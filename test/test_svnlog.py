@@ -1,24 +1,25 @@
 import svnlog
+from io import StringIO
 from svnlog import LogEntry, Path
+
+single_entry_log = """
+    <log>
+    <logentry revision="43657">
+    <author>bob</author>
+    <date>2020-04-09T01:11:44.487000Z</date>
+    <paths>
+    <path action="M" prop-mods="false" text-mods="true" kind="file">src/main/java/Main.java</path>
+    </paths>
+    <msg>fix typos</msg>
+    </logentry>
+    </log>
+"""
 
 def test_format_empty_logs():
     assert svnlog.format('') == ''
 
 def test_format_single_entry_log():
-    xml = """
-        <log>
-        <logentry revision="43657">
-        <author>bob</author>
-        <date>2020-04-09T01:11:44.487000Z</date>
-        <paths>
-        <path action="M" prop-mods="false" text-mods="true" kind="file">src/main/java/Main.java</path>
-        </paths>
-        <msg>fix typos</msg>
-        </logentry>
-        </log>
-    """
-
-    assert svnlog.format(xml) == """\
+    assert svnlog.format(single_entry_log) == """\
 Revision: 43657
 Author: bob
 Date: 2020年4月9日 01:11:44
@@ -97,22 +98,9 @@ remove package-info
 Deleted: src/main/java/package-info.java
 """
 
-def test_format_from_iostream():
-    xml = """
-        <log>
-        <logentry revision="43657">
-        <author>bob</author>
-        <date>2020-04-09T01:11:44.487000Z</date>
-        <paths>
-        <path action="M" prop-mods="false" text-mods="true" kind="file">src/main/java/Main.java</path>
-        </paths>
-        <msg>fix typos</msg>
-        </logentry>
-        </log>
-    """
 
-    from io import StringIO
-    assert svnlog.format(StringIO(xml)) == """\
+def test_format_from_iostream():
+    assert svnlog.format(StringIO(single_entry_log)) == """\
 Revision: 43657
 Author: bob
 Date: 2020年4月9日 01:11:44
@@ -122,15 +110,20 @@ fix typos
 Modified: src/main/java/Main.java
 """
 
+def test_format_with_custom_template():
+    result = svnlog.format(StringIO(single_entry_log), template="{revision}: {','.join(path.path for path in paths)}")
+
+    assert result == "43657: src/main/java/Main.java", result
+
 
 def test_create_log_entry_from_xml_without_paths():
-    entry = LogEntry.parse("""
+    entry = LogEntry(parse("""
         <logentry revision="43657">
         <author>bob</author>
         <date>2020-04-09T01:11:44.487000Z</date>
         <msg>fix typos</msg>
         </logentry>
-    """)
+    """))
 
     assert entry.revision == '43657'
     assert entry.author == 'bob'
@@ -140,7 +133,7 @@ def test_create_log_entry_from_xml_without_paths():
 
 
 def test_create_log_entry_with_modified_paths():
-    entry = LogEntry.parse("""
+    entry = LogEntry(parse("""
         <logentry revision="43657">
         <author>bob</author>
         <date>2020-04-09T01:11:44.487000Z</date>
@@ -149,17 +142,18 @@ def test_create_log_entry_with_modified_paths():
         </paths>
         <msg>fix typos</msg>
         </logentry>
-    """)
+    """))
 
-    assert entry.revision == '43657'
-    assert entry.author == 'bob'
-    assert entry.date == '2020年4月9日 01:11:44'
-    assert entry.message == 'fix typos'
     assert [str(path) for path in entry.paths] == ['Modified: src/main/java/test.java']
 
 
 def test_path_actions():
-   assert Path.parse('<path action="M"/>').action == 'Modified'
-   assert Path.parse('<path action="A"/>').action == 'Added'
-   assert Path.parse('<path action="R"/>').action == 'Renamed'
-   assert Path.parse('<path action="D"/>').action == 'Deleted'
+   assert Path(parse('<path action="M"/>')).action == 'Modified'
+   assert Path(parse('<path action="A"/>')).action == 'Added'
+   assert Path(parse('<path action="R"/>')).action == 'Renamed'
+   assert Path(parse('<path action="D"/>')).action == 'Deleted'
+
+def parse(xml):
+    from xml.etree import ElementTree as ET
+
+    return ET.parse(StringIO(xml)).getroot()
