@@ -13,7 +13,7 @@ Author: {author}
 Date: {date}
 Message:
 {message}
-----
+--------------------------------
 {crlf.join(str(path) for path in paths)}
 """
  
@@ -92,7 +92,8 @@ class LogEntry:
 
     @property
     def message(self) -> str:
-        return self._element.find('msg').text
+        msg = self._element.find('msg')
+        return '' if msg is None else msg.text
 
     @property
     def paths(self) -> Generator[Path, None, None]:

@@ -25,7 +25,7 @@ Author: bob
 Date: 2020年4月9日 01:11:44
 Message:
 fix typos
-----
+--------------------------------
 Modified: src/main/java/Main.java
 """
 
@@ -51,7 +51,7 @@ Author: bob
 Date: 2020年4月9日 01:11:44
 Message:
 fix typos
-----
+--------------------------------
 Modified: src/main/java/Main.java
 Deleted: src/main/java/package-info.java
 """
@@ -85,7 +85,7 @@ Author: bob
 Date: 2020年4月9日 01:11:44
 Message:
 fix typos
-----
+--------------------------------
 Modified: src/main/java/Main.java
 
 
@@ -94,7 +94,7 @@ Author: kitty
 Date: 2020年4月9日 00:11:44
 Message:
 remove package-info
-----
+--------------------------------
 Deleted: src/main/java/package-info.java
 """
 
@@ -106,7 +106,7 @@ Author: bob
 Date: 2020年4月9日 01:11:44
 Message:
 fix typos
-----
+--------------------------------
 Modified: src/main/java/Main.java
 """
 
@@ -114,6 +114,17 @@ def test_format_with_custom_template():
     result = svnlog.format(StringIO(single_entry_log), template="{revision}: {','.join(path.path for path in paths)}")
 
     assert result == "43657: src/main/java/Main.java", result
+
+
+def test_log_entry_message_is_optional():
+    entry = LogEntry(parse("""
+        <logentry revision="43657">
+        <author>bob</author>
+        <date>2020-04-09T01:11:44.487000Z</date>
+        </logentry>
+    """))
+
+    assert entry.message == ''
 
 
 def test_create_log_entry_from_xml_without_paths():
