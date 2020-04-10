@@ -25,7 +25,7 @@ def test_format_log_from_non_atty_stream():
         </log>
     """)
 
-    main(STDIN, stdin=xml, printer=stdout.write)
+    main(STDIN, stdin=xml, write=stdout.write)
 
     assert "fix typos" in stdout.getvalue()
 
@@ -33,7 +33,7 @@ def test_format_log_from_non_atty_stream():
 def test_format_log_from_file():
     stdout = StringIO()
 
-    main(STDIN, stdin=path_of('log.xml'), printer=stdout.write)
+    main(STDIN, stdin=path_of('log.xml'), write=stdout.write)
 
     assert "fix typos" in stdout.getvalue()
 
@@ -41,7 +41,7 @@ def test_format_log_from_file():
 def test_use_custom_template_to_format_log():
     stdout = StringIO()
 
-    main(STDIN, '-t', path_of('template.txt'), stdin=path_of('log.xml'), printer=stdout.write)
+    main(STDIN, '-t', path_of('template.txt'), stdin=path_of('log.xml'), write=stdout.write)
 
     assert "43657: fix typos\n" == stdout.getvalue()
 

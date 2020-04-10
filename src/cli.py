@@ -5,13 +5,13 @@ from argparse import ArgumentParser
 
 STDIN = str('/dev/stdin')
 
-def main(*args, stdin:Union[str, IO]=sys.stdin, printer:Callable[[str], None]=print):
+def main(*args, stdin:Union[str, IO]=sys.stdin, write:Callable[[str], None]=print):
     try:
         parser=build_parser(stdin)
 
         options = parser.parse_args(args or sys.argv[1:])
 
-        printer(svnlog.format(options.file, template=load_template(options.template)))
+        write(svnlog.format(options.file, template=load_template(options.template)))
     except FileNotFoundError as e:
         raise SystemExit(f'{e.strerror}: {e.filename}')
     except IOError:
