@@ -4,9 +4,13 @@ from cli import main, STDIN
 from io import StringIO
 from os import path
 
+class tty:
+    def isatty(self): 
+        return True
+
 def test_show_usage_if_stream_is_a_tty_stream():
     with pytest.raises(SystemExit, match='usage:'):
-        main(STDIN, stdin=sys.stdin)
+        main(STDIN, stdin=tty())
 
 
 def test_format_log_from_non_atty_stream():
