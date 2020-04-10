@@ -1,16 +1,19 @@
-from io import StringIO
+from typing import Union
+from io import StringIO, IOBase
 from xml.etree import ElementTree as ET
 import time
 import datetime
 
 _ISO_FORMAT_ = '%Y-%m-%dT%H:%M:%S.%fZ'
 
-def format(xml:str) -> str:
+def format(xml:Union[str, ]) -> str:
     if not xml:
         return ""
 
-    log = ET.parse(StringIO(xml)).getroot()
+    if isinstance(xml, str):
+        xml = StringIO(xml)
 
+    log = ET.parse(xml).getroot()
 
     return "\n\n".join(str(LogEntry(entry)) for entry in log)
 
@@ -93,6 +96,5 @@ class Path:
 
     def __str__(self):
         return f"{self.action}: {self.path}"
-
 
 

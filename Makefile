@@ -3,3 +3,6 @@ SHELL=bash
 
 test:
 	@source .bashrc && python setup.py test
+
+install:
+	@source .bashrc && python setup.py install

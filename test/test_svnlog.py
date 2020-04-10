@@ -56,6 +56,73 @@ Deleted: src/main/java/package-info.java
 """
 
 
+def test_format_multiple_log_entries():
+    xml = """
+        <log>
+        <logentry revision="43657">
+        <author>bob</author>
+        <date>2020-04-09T01:11:44.487000Z</date>
+        <paths>
+        <path action="M" prop-mods="false" text-mods="true" kind="file">src/main/java/Main.java</path>
+        </paths>
+        <msg>fix typos</msg>
+        </logentry>
+        <logentry revision="43655">
+        <author>kitty</author>
+        <date>2020-04-09T00:11:44.487000Z</date>
+        <paths>
+        <path action="D" prop-mods="false" text-mods="true" kind="file">src/main/java/package-info.java</path>
+        </paths>
+        <msg>remove package-info</msg>
+        </logentry>
+        </log>
+    """
+
+    assert svnlog.format(xml) == """\
+Revision: 43657
+Author: bob
+Date: 2020年4月9日 01:11:44
+Message:
+fix typos
+----
+Modified: src/main/java/Main.java
+
+
+Revision: 43655
+Author: kitty
+Date: 2020年4月9日 00:11:44
+Message:
+remove package-info
+----
+Deleted: src/main/java/package-info.java
+"""
+
+def test_format_from_iostream():
+    xml = """
+        <log>
+        <logentry revision="43657">
+        <author>bob</author>
+        <date>2020-04-09T01:11:44.487000Z</date>
+        <paths>
+        <path action="M" prop-mods="false" text-mods="true" kind="file">src/main/java/Main.java</path>
+        </paths>
+        <msg>fix typos</msg>
+        </logentry>
+        </log>
+    """
+
+    from io import StringIO
+    assert svnlog.format(StringIO(xml)) == """\
+Revision: 43657
+Author: bob
+Date: 2020年4月9日 01:11:44
+Message:
+fix typos
+----
+Modified: src/main/java/Main.java
+"""
+
+
 def test_create_log_entry_from_xml_without_paths():
     entry = LogEntry.parse("""
         <logentry revision="43657">
