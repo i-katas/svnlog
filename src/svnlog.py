@@ -51,10 +51,6 @@ class Path:
     def __init__(self, element):
         self._element = element
 
-    @staticmethod
-    def parse(xml: str):
-        return Path(ET.parse(StringIO(xml)).getroot())
-
     @property
     def path(self) -> str:
         return self._element.text
@@ -64,7 +60,7 @@ class Path:
         return self._actions.get(self._element.get('action'))
 
     def __str__(self) -> str:
-        return f"{self.action}: {self.path}"
+        return ': '.join((self.action, self.path))
 
 
 class LogEntry:
@@ -72,10 +68,6 @@ class LogEntry:
         self._element = element
         self._template = template
         self._date_format = date_format
-
-    @staticmethod
-    def parse(xml):
-        return LogEntry(ET.parse(StringIO(xml)).getroot())
 
     @property
     def revision(self) -> str:
