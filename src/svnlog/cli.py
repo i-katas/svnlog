@@ -9,9 +9,7 @@ STDIN = str(b'/dev/stdin')
 def main(*args, stdin: Union[str, IO] = sys.stdin, write: Callable[[str], None] = print):
     try:
         args = args or sys.argv[1:]
-        parser = build_parser(redirect(stdin))
-        if not args and not isinstance(stdin, str) and stdin.isatty():
-            raise SystemExit(parser.format_help())
+        parser = build_parser(stdin)
 
         options = parser.parse_args(args)
 
@@ -20,22 +18,22 @@ def main(*args, stdin: Union[str, IO] = sys.stdin, write: Callable[[str], None] 
         raise SystemExit(f'{e.strerror}: {e.filename}')
 
 
-def redirect(stdin):
-    def wrap(path):
+def build_parser(stdin: Union[str, IO]):
+    parser = ArgumentParser(prog=svnlog.__name__)
+
+    def redirect(path):
         if path is STDIN:
             if isinstance(stdin, str):
                 return open(stdin)
-            else:
-                return stdin
+            if stdin.isatty():
+                raise SystemExit(parser.format_help())
+            return stdin
         return open(path)
-    return wrap
 
-
-def build_parser(source):
-    parser = ArgumentParser()
-    parser.add_argument('file', type=source, nargs='?', default=STDIN, help='the svn xml format log file')
+    parser.add_argument('file', type=redirect, nargs='?', default=STDIN, help='the svn xml format log file')
     parser.add_argument('-t', '--template', type=open, help='use custom log template file')
     parser.add_argument('-p', '--remote-path', type=str, help='remove the remote path from the path of log entry')
+
     return parser
 
 

@@ -3,6 +3,7 @@ from io import StringIO
 from xml.etree import ElementTree as ET
 from datetime import datetime
 
+PATH_SEPERATOR = '/'
 _ISO_FORMAT_ = '%Y-%m-%dT%H:%M:%S.%fZ'
 _DEFAULT_DATE_FORMAT_ = '%Y年%-m月%-d日 %H:%M:%S'
 _DEFAULT_TEMPLATE_ = f"""\
@@ -52,11 +53,10 @@ class Path:
 
 
 class LogEntry:
-    PATH_SEPERATOR = '/'
 
     def __init__(self, element: ET.Element, remote_path: str = None):
         self._element = element
-        self._remote_path = remote_path + self.PATH_SEPERATOR if remote_path and not remote_path.endswith(self.PATH_SEPERATOR) else remote_path
+        self._remote_path = remote_path
 
     @property
     def revision(self) -> str:
@@ -95,5 +95,8 @@ def parse(source: Union[str, IO], remote_path: str = None) -> Iterator[LogEntry]
 
     if isinstance(source, str):
         source = StringIO(source)
+
+    if remote_path and not remote_path.endswith(PATH_SEPERATOR):
+        remote_path = remote_path + PATH_SEPERATOR
 
     return (LogEntry(entry, remote_path) for entry in ET.parse(source).getroot())

@@ -53,12 +53,26 @@ def test_suppress_traceback_if_file_not_exists():
 
 
 def test_run_as_script():
-    import sys
-    from subprocess import check_output
-
-    log = str(check_output([sys.executable, path_of('../src/svnlog/cli.py'), path_of('log.xml')]), encoding='utf8')
+    log = run(path_of('../src/svnlog/cli.py'), path_of('log.xml')).communicate()[0]
 
     assert "Message:\nfix typos" in log
+
+
+def test_fails_to_run_as_script_with_tty_stdin():
+    proc = run(path_of('../src/svnlog/cli.py'), '--template', path_of('template.txt'))
+    try:
+        err = proc.communicate(timeout=0.5)[1]
+
+        assert 'usage: svnlog' in err
+    finally:
+        proc.kill()
+
+
+def run(*args):
+    import sys
+    from subprocess import Popen, PIPE
+
+    return Popen([sys.executable, *args], stdout=PIPE, stderr=PIPE, text=True)
 
 
 def test_print_paths_relative_to_current_working_dir():
