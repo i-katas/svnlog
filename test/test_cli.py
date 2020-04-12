@@ -1,12 +1,13 @@
-import sys
 import pytest
 from cli import main, STDIN
 from io import StringIO
 from os import path
 
+
 class tty:
-    def isatty(self): 
+    def isatty(self):
         return True
+
 
 def test_show_usage_if_stream_is_a_tty_stream():
     with pytest.raises(SystemExit, match='usage:'):
@@ -53,5 +54,3 @@ def test_suppress_traceback_if_file_not_exists():
 
 def path_of(file):
     return path.join(path.dirname(__file__), file)
-
-

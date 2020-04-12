@@ -5,8 +5,7 @@ from datetime import datetime
 
 _ISO_FORMAT_ = '%Y-%m-%dT%H:%M:%S.%fZ'
 _DEFAULT_DATE_FORMAT_ = '%Y年%-m月%-d日 %H:%M:%S'
-_DEFAULT_TEMPLATE_ = \
-f"""\
+_DEFAULT_TEMPLATE_ = f"""\
 Revision: {{revision}}
 Author: {{author}}
 Date: {{date.strftime('{_DEFAULT_DATE_FORMAT_}')}}
@@ -15,7 +14,7 @@ Message:
 --------------------------------
 {{crlf.join(str(path) for path in paths)}}
 """
- 
+
 
 class Path:
     """
@@ -33,7 +32,7 @@ class Path:
     R
     The item was replaced by a different one at the same location.
     """
-    _actions=dict(A='Added', M='Modified', R='Renamed', D='Deleted')
+    _actions = dict(A='Added', M='Modified', R='Renamed', D='Deleted')
 
     def __init__(self, element):
         self._element = element
@@ -77,7 +76,7 @@ class LogEntry:
         return (Path(path) for path in self._element.findall('paths/path'))
 
 
-def format(entries:List[LogEntry], template:str=_DEFAULT_TEMPLATE_) -> str:
+def format(entries: List[LogEntry], template: str = _DEFAULT_TEMPLATE_) -> str:
     def __format__(entry: LogEntry) -> str:
         props = dict(revision=entry.revision, author=entry.author, date=entry.date, message=entry.message, paths=entry.paths, crlf='\n')
         return eval(f'f"""{template}"""', props, props)
@@ -93,4 +92,3 @@ def parse(source: Union[str, IO]) -> Iterator[LogEntry]:
         source = StringIO(source)
 
     return (LogEntry(entry) for entry in ET.parse(source).getroot())
-

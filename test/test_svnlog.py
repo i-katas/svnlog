@@ -15,8 +15,10 @@ single_entry_log = """
     </log>
 """
 
+
 def test_parse_empty_logs():
     assert not next(svnlog.parse(''), None)
+
 
 def test_format_single_entry_log():
     assert svnlog.format(svnlog.parse(single_entry_log)) == """\
@@ -110,6 +112,7 @@ fix typos
 Modified: src/main/java/Main.java
 """
 
+
 def test_format_with_custom_template():
     result = svnlog.format(svnlog.parse(StringIO(single_entry_log)), template="{revision}: {','.join(path.path for path in paths)}")
 
@@ -159,10 +162,11 @@ def test_create_log_entry_with_modified_paths():
 
 
 def test_path_actions():
-   assert Path(parse('<path action="M"/>')).action == 'Modified'
-   assert Path(parse('<path action="A"/>')).action == 'Added'
-   assert Path(parse('<path action="R"/>')).action == 'Renamed'
-   assert Path(parse('<path action="D"/>')).action == 'Deleted'
+    assert Path(parse('<path action="M"/>')).action == 'Modified'
+    assert Path(parse('<path action="A"/>')).action == 'Added'
+    assert Path(parse('<path action="R"/>')).action == 'Renamed'
+    assert Path(parse('<path action="D"/>')).action == 'Deleted'
+
 
 def parse(xml):
     from xml.etree import ElementTree as ET

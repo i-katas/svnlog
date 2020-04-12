@@ -1,9 +1,12 @@
 SHELL=bash
 .PHONY: test
 
-test:
+test: check
 	@-tput reset
 	@source .bashrc && python setup.py test
+
+check:
+	@flake8
 
 install:
 	@source .bashrc && python setup.py install

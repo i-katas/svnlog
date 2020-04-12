@@ -1,14 +1,14 @@
-import svnlog 
+import svnlog
 import sys
 from typing import Callable, Union, IO, Optional
-from argparse import ArgumentParser 
+from argparse import ArgumentParser
 
 STDIN = str(b'/dev/stdin')
 
 
-def main(*args, stdin:Union[str, IO]=sys.stdin, write:Callable[[str], None]=print):
+def main(*args, stdin: Union[str, IO] = sys.stdin, write: Callable[[str], None] = print):
     try:
-        parser=build_parser(stdin)
+        parser = build_parser(stdin)
 
         options = parser.parse_args(args or sys.argv[1:])
 
@@ -17,6 +17,7 @@ def main(*args, stdin:Union[str, IO]=sys.stdin, write:Callable[[str], None]=prin
         raise SystemExit(f'{e.strerror}: {e.filename}')
     except IOError:
         raise SystemExit(parser.format_help())
+
 
 def build_parser(stdin):
     def vfile(path):
@@ -35,5 +36,5 @@ def build_parser(stdin):
     return parser
 
 
-def load_template(tpl:Optional[IO]) -> str:
+def load_template(tpl: Optional[IO]) -> str:
     return ''.join(tpl.readlines()) if tpl else svnlog._DEFAULT_TEMPLATE_
