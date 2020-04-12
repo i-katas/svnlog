@@ -1,7 +1,6 @@
-from typing import Union, Generator, IO
+from typing import Union, Generator, IO, List, cast, Iterator
 from io import StringIO
 from xml.etree import ElementTree as ET
-import time
 from datetime import datetime
 
 _ISO_FORMAT_ = '%Y-%m-%dT%H:%M:%S.%fZ'
@@ -17,22 +16,6 @@ Message:
 {{crlf.join(str(path) for path in paths)}}
 """
  
-
-def format(source:Union[str, IO], template:str=_DEFAULT_TEMPLATE_) -> str:
-    log = parse(source, template)
-    return "\n\n".join(str(entry) for entry in log)
-
-
-def parse(source, template):
-    if not source:
-        return ()
-
-    if isinstance(source, str):
-        source = StringIO(source)
-
-    return (LogEntry(entry, template) for entry in ET.parse(source).getroot())
-
-
 
 class Path:
     """
@@ -68,9 +51,8 @@ class Path:
 
 
 class LogEntry:
-    def __init__(self, element: ET.Element, template:str=None):
+    def __init__(self, element: ET.Element):
         self._element = element
-        self._template = template
 
     @property
     def revision(self) -> str:
@@ -94,6 +76,21 @@ class LogEntry:
     def paths(self) -> Generator[Path, None, None]:
         return (Path(path) for path in self._element.findall('paths/path'))
 
-    def __str__(self) -> str:
-            props = dict(revision=self.revision, author=self.author, date=self.date, message=self.message, paths=self.paths, crlf='\n')
-            return eval(f'f"""{self._template}"""', props, props)
+
+def format(entries:List[LogEntry], template:str=_DEFAULT_TEMPLATE_) -> str:
+    def __format__(entry: LogEntry) -> str:
+        props = dict(revision=entry.revision, author=entry.author, date=entry.date, message=entry.message, paths=entry.paths, crlf='\n')
+        return eval(f'f"""{template}"""', props, props)
+
+    return "\n\n".join(__format__(cast(LogEntry, entry)) for entry in entries)
+
+
+def parse(source: Union[str, IO]) -> Iterator[LogEntry]:
+    if not source:
+        return iter(())
+
+    if isinstance(source, str):
+        source = StringIO(source)
+
+    return (LogEntry(entry) for entry in ET.parse(source).getroot())
+

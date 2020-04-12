@@ -15,11 +15,11 @@ single_entry_log = """
     </log>
 """
 
-def test_format_empty_logs():
-    assert svnlog.format('') == ''
+def test_parse_empty_logs():
+    assert not next(svnlog.parse(''), None)
 
 def test_format_single_entry_log():
-    assert svnlog.format(single_entry_log) == """\
+    assert svnlog.format(svnlog.parse(single_entry_log)) == """\
 Revision: 43657
 Author: bob
 Date: 2020年4月9日 01:11:44
@@ -45,7 +45,7 @@ def test_format_single_entry_log_with_multiple_paths():
         </log>
     """
 
-    assert svnlog.format(xml) == """\
+    assert svnlog.format(svnlog.parse(xml)) == """\
 Revision: 43657
 Author: bob
 Date: 2020年4月9日 01:11:44
@@ -79,7 +79,7 @@ def test_format_multiple_log_entries():
         </log>
     """
 
-    assert svnlog.format(xml) == """\
+    assert svnlog.format(svnlog.parse(xml)) == """\
 Revision: 43657
 Author: bob
 Date: 2020年4月9日 01:11:44
@@ -100,7 +100,7 @@ Deleted: src/main/java/package-info.java
 
 
 def test_format_from_iostream():
-    assert svnlog.format(StringIO(single_entry_log)) == """\
+    assert svnlog.format(svnlog.parse(StringIO(single_entry_log))) == """\
 Revision: 43657
 Author: bob
 Date: 2020年4月9日 01:11:44
@@ -111,7 +111,7 @@ Modified: src/main/java/Main.java
 """
 
 def test_format_with_custom_template():
-    result = svnlog.format(StringIO(single_entry_log), template="{revision}: {','.join(path.path for path in paths)}")
+    result = svnlog.format(svnlog.parse(StringIO(single_entry_log)), template="{revision}: {','.join(path.path for path in paths)}")
 
     assert result == "43657: src/main/java/Main.java", result
 

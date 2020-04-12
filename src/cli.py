@@ -3,7 +3,8 @@ import sys
 from typing import Callable, Union, IO, Optional
 from argparse import ArgumentParser 
 
-STDIN = str('/dev/stdin')
+STDIN = str(b'/dev/stdin')
+
 
 def main(*args, stdin:Union[str, IO]=sys.stdin, write:Callable[[str], None]=print):
     try:
@@ -11,7 +12,7 @@ def main(*args, stdin:Union[str, IO]=sys.stdin, write:Callable[[str], None]=prin
 
         options = parser.parse_args(args or sys.argv[1:])
 
-        write(svnlog.format(options.file, template=load_template(options.template)))
+        write(svnlog.format(svnlog.parse(options.file), template=load_template(options.template)))
     except FileNotFoundError as e:
         raise SystemExit(f'{e.strerror}: {e.filename}')
     except IOError:
