@@ -1,15 +1,16 @@
-SHELL=bash
 .PHONY: test
+SHELL=bash
+ACTIVATE_ENV=source .bashrc
 
 test: check
 	@-tput reset
-	@source .bashrc && python setup.py test
+	@${ACTIVATE_ENV} && python setup.py test
 
 check:
-	@flake8
+	@${ACTIVATE_ENV} && flake8
 
 install:
-	@source .bashrc && python setup.py install
+	@${ACTIVATE_ENV} && python setup.py install
 
 clean:
 	@rm -rf .pytest_cache .eggs build dist *.egg-info src/*.egg-info
