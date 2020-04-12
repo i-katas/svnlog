@@ -31,3 +31,6 @@ jobs:
       run: |
         python -m virtualenv .env
         make test
+        pip install -e .
+        source .bashrc
+        svnlog test/log.xml

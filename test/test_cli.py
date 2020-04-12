@@ -1,5 +1,5 @@
 import pytest
-from cli import main
+from svnlog.cli import main
 from io import StringIO
 from os import path
 
@@ -56,7 +56,7 @@ def test_run_as_script():
     import sys
     from subprocess import check_output
 
-    log = str(check_output([sys.executable, path_of('../src/cli.py'), path_of('log.xml')]), encoding='utf8')
+    log = str(check_output([sys.executable, path_of('../src/svnlog/cli.py'), path_of('log.xml')]), encoding='utf8')
 
     assert "Message:\nfix typos" in log
 

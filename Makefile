@@ -3,10 +3,10 @@ SHELL=bash
 ACTIVATE_ENV=source .bashrc
 
 test: check
-	@-tput reset
 	@${ACTIVATE_ENV} && python setup.py test
 
 check:
+	@-tput reset
 	@${ACTIVATE_ENV} && flake8
 
 install:
