@@ -10,7 +10,7 @@ def main(*args, stdin: Union[str, IO] = sys.stdin, write: Callable[[str], None] 
     try:
         args = args or sys.argv[1:]
         parser = build_parser(redirect(stdin))
-        if (not args or STDIN in args) and hasattr(stdin, 'isatty') and stdin.isatty():
+        if not args and not isinstance(stdin, str) and stdin.isatty():
             raise SystemExit(parser.format_help())
 
         options = parser.parse_args(args)

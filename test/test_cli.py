@@ -1,5 +1,5 @@
 import pytest
-from cli import main, STDIN
+from cli import main
 from io import StringIO
 from os import path
 
@@ -11,7 +11,7 @@ class tty:
 
 def test_show_usage_if_stream_is_a_tty_stream():
     with pytest.raises(SystemExit, match='usage:'):
-        main(STDIN, stdin=tty())
+        main(stdin=tty())
 
 
 def test_format_log_from_non_atty_stream():
@@ -26,7 +26,7 @@ def test_format_log_from_non_atty_stream():
         </log>
     """)
 
-    main(STDIN, stdin=xml, write=stdout.write)
+    main(stdin=xml, write=stdout.write)
 
     assert "fix typos" in stdout.getvalue()
 
@@ -34,7 +34,7 @@ def test_format_log_from_non_atty_stream():
 def test_format_log_from_file():
     stdout = StringIO()
 
-    main(STDIN, stdin=path_of('log.xml'), write=stdout.write)
+    main(stdin=path_of('log.xml'), write=stdout.write)
 
     assert "fix typos" in stdout.getvalue()
 
@@ -42,14 +42,14 @@ def test_format_log_from_file():
 def test_use_custom_template_to_format_log():
     stdout = StringIO()
 
-    main(STDIN, '-t', path_of('template.txt'), stdin=path_of('log.xml'), write=stdout.write)
+    main('-t', path_of('template.txt'), stdin=path_of('log.xml'), write=stdout.write)
 
     assert "43657: fix typos\n" == stdout.getvalue()
 
 
 def test_suppress_traceback_if_file_not_exists():
     with pytest.raises(SystemExit, match='No such file'):
-        main(STDIN, stdin=path_of('absent'))
+        main(stdin=path_of('absent'))
 
 
 def test_run_as_script():
@@ -77,9 +77,16 @@ def test_print_paths_relative_to_current_working_dir():
 
     stdout = StringIO()
 
-    main(STDIN, '--remote-path', '/remote/trunk', stdin=StringIO(xml), write=stdout.write)
+    main('--remote-path', '/remote/trunk', stdin=StringIO(xml), write=stdout.write)
 
     assert "Modified: src/main/java/Main.java" in stdout.getvalue()
+
+
+def test_raise_syntax_error_when_parse_a_bad_log_file():
+    bad_log = '<badlog>'
+
+    with pytest.raises(SyntaxError):
+        main(stdin=StringIO(bad_log))
 
 
 def path_of(file):
