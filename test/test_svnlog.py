@@ -161,6 +161,18 @@ def test_create_log_entry_with_modified_paths():
     assert [str(path) for path in entry.paths] == ['Modified: src/main/java/test.java']
 
 
+def test_remove_remote_path_if_possible():
+    entry = next(svnlog.parse(single_entry_log, remote_path='src/main/java/'))
+
+    assert [str(path) for path in entry.paths] == ['Modified: Main.java']
+
+
+def test_remove_remote_path_not_ends_with_slash():
+    entry = next(svnlog.parse(single_entry_log, remote_path='src/main/java'))
+
+    assert [str(path) for path in entry.paths] == ['Modified: Main.java']
+
+
 def test_path_actions():
     assert Path(parse('<path action="M"/>')).action == 'Modified'
     assert Path(parse('<path action="A"/>')).action == 'Added'

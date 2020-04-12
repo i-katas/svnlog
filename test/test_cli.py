@@ -61,5 +61,26 @@ def test_run_as_script():
     assert "Message:\nfix typos" in log
 
 
+def test_print_paths_relative_to_current_working_dir():
+    xml = """
+        <log>
+        <logentry revision="43655">
+        <author>kitty</author>
+        <date>2020-04-09T00:11:44.487000Z</date>
+        <paths>
+        <path action="M" prop-mods="false" text-mods="true" kind="file">/remote/trunk/src/main/java/Main.java</path>
+        </paths>
+        <msg>remove package-info</msg>
+        </logentry>
+        </log>
+    """
+
+    stdout = StringIO()
+
+    main(STDIN, '--remote-path', '/remote/trunk', stdin=StringIO(xml), write=stdout.write)
+
+    assert "Modified: src/main/java/Main.java" in stdout.getvalue()
+
+
 def path_of(file):
     return path.join(path.dirname(__file__), file)

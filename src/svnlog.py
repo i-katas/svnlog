@@ -34,12 +34,14 @@ class Path:
     """
     _actions = dict(A='Added', M='Modified', R='Renamed', D='Deleted')
 
-    def __init__(self, element):
+    def __init__(self, element, remote_path=None):
         self._element = element
+        self._remote_path = remote_path
 
     @property
     def path(self) -> str:
-        return self._element.text
+        path = self._element.text
+        return path[len(self._remote_path):] if self._remote_path and path.startswith(self._remote_path) else path
 
     @property
     def action(self) -> str:
@@ -50,8 +52,11 @@ class Path:
 
 
 class LogEntry:
-    def __init__(self, element: ET.Element):
+    PATH_SEPERATOR = '/'
+
+    def __init__(self, element: ET.Element, remote_path: str = None):
         self._element = element
+        self._remote_path = remote_path + self.PATH_SEPERATOR if remote_path and not remote_path.endswith(self.PATH_SEPERATOR) else remote_path
 
     @property
     def revision(self) -> str:
@@ -73,7 +78,7 @@ class LogEntry:
 
     @property
     def paths(self) -> Generator[Path, None, None]:
-        return (Path(path) for path in self._element.findall('paths/path'))
+        return (Path(path, self._remote_path) for path in self._element.findall('paths/path'))
 
 
 def format(entries: List[LogEntry], template: str = _DEFAULT_TEMPLATE_) -> str:
@@ -84,11 +89,11 @@ def format(entries: List[LogEntry], template: str = _DEFAULT_TEMPLATE_) -> str:
     return "\n\n".join(__format__(cast(LogEntry, entry)) for entry in entries)
 
 
-def parse(source: Union[str, IO]) -> Iterator[LogEntry]:
+def parse(source: Union[str, IO], remote_path: str = None) -> Iterator[LogEntry]:
     if not source:
         return iter(())
 
     if isinstance(source, str):
         source = StringIO(source)
 
-    return (LogEntry(entry) for entry in ET.parse(source).getroot())
+    return (LogEntry(entry, remote_path) for entry in ET.parse(source).getroot())

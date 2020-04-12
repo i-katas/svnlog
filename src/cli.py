@@ -12,7 +12,7 @@ def main(*args, stdin: Union[str, IO] = sys.stdin, write: Callable[[str], None] 
 
         options = parser.parse_args(args or sys.argv[1:])
 
-        write(svnlog.format(svnlog.parse(options.file), template=load_template(options.template)))
+        write(svnlog.format(svnlog.parse(options.file, remote_path=options.remote_path), template=load_template(options.template)))
     except FileNotFoundError as e:
         raise SystemExit(f'{e.strerror}: {e.filename}')
     except IOError:
@@ -33,6 +33,7 @@ def build_parser(stdin):
     parser = ArgumentParser()
     parser.add_argument('file', type=vfile, nargs='?', default=STDIN, help='the svn xml format log file')
     parser.add_argument('-t', '--template', type=open, help='svn log template file')
+    parser.add_argument('-p', '--remote-path', type=str, help='remote path relative to current working directory')
     return parser
 
 
