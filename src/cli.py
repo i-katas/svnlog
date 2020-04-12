@@ -38,3 +38,7 @@ def build_parser(stdin):
 
 def load_template(tpl: Optional[IO]) -> str:
     return ''.join(tpl.readlines()) if tpl else svnlog._DEFAULT_TEMPLATE_
+
+
+if __name__ == '__main__':
+    main()

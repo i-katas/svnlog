@@ -52,5 +52,14 @@ def test_suppress_traceback_if_file_not_exists():
         main(STDIN, stdin=path_of('absent'))
 
 
+def test_run_as_script():
+    import sys
+    from subprocess import check_output
+
+    log = str(check_output([sys.executable, path_of('../src/cli.py'), path_of('log.xml')]), encoding='utf8')
+
+    assert "Message:\nfix typos" in log
+
+
 def path_of(file):
     return path.join(path.dirname(__file__), file)
