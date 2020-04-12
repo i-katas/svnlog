@@ -2,35 +2,35 @@ from typing import Union, Generator, IO
 from io import StringIO
 from xml.etree import ElementTree as ET
 import time
-import datetime
+from datetime import datetime
 
 _ISO_FORMAT_ = '%Y-%m-%dT%H:%M:%S.%fZ'
 _DEFAULT_DATE_FORMAT_ = '%Y年%-m月%-d日 %H:%M:%S'
 _DEFAULT_TEMPLATE_ = \
-"""\
-Revision: {revision}
-Author: {author}
-Date: {date}
+f"""\
+Revision: {{revision}}
+Author: {{author}}
+Date: {{date.strftime('{_DEFAULT_DATE_FORMAT_}')}}
 Message:
-{message}
+{{message}}
 --------------------------------
-{crlf.join(str(path) for path in paths)}
+{{crlf.join(str(path) for path in paths)}}
 """
  
 
-def format(source:Union[str, IO], template:str=_DEFAULT_TEMPLATE_, date_format:str=_DEFAULT_DATE_FORMAT_) -> str:
-    log = parse(source, template, date_format)
+def format(source:Union[str, IO], template:str=_DEFAULT_TEMPLATE_) -> str:
+    log = parse(source, template)
     return "\n\n".join(str(entry) for entry in log)
 
 
-def parse(source, template, date_format):
+def parse(source, template):
     if not source:
         return ()
 
     if isinstance(source, str):
         source = StringIO(source)
 
-    return (LogEntry(entry, template, date_format) for entry in ET.parse(source).getroot())
+    return (LogEntry(entry, template) for entry in ET.parse(source).getroot())
 
 
 
@@ -68,10 +68,9 @@ class Path:
 
 
 class LogEntry:
-    def __init__(self, element: ET.Element, template:str=None, date_format=_DEFAULT_DATE_FORMAT_):
+    def __init__(self, element: ET.Element, template:str=None):
         self._element = element
         self._template = template
-        self._date_format = date_format
 
     @property
     def revision(self) -> str:
@@ -82,9 +81,9 @@ class LogEntry:
         return self._element.find('author').text
 
     @property
-    def date(self) -> str:
+    def date(self) -> datetime:
         date = self._element.find('date').text
-        return time.strftime(self._date_format, time.strptime(date, _ISO_FORMAT_))
+        return datetime.strptime(date, _ISO_FORMAT_)
 
     @property
     def message(self) -> str:

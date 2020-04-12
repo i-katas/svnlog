@@ -1,6 +1,6 @@
 import svnlog
 from io import StringIO
-from svnlog import LogEntry, Path
+from svnlog import LogEntry, Path, _DEFAULT_DATE_FORMAT_
 
 single_entry_log = """
     <log>
@@ -138,7 +138,7 @@ def test_create_log_entry_from_xml_without_paths():
 
     assert entry.revision == '43657'
     assert entry.author == 'bob'
-    assert entry.date == '2020年4月9日 01:11:44'
+    assert entry.date.strftime(_DEFAULT_DATE_FORMAT_) == '2020年4月9日 01:11:44'
     assert entry.message == 'fix typos'
     assert [*entry.paths] == []
 
