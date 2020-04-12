@@ -18,16 +18,20 @@ Message:
 """
  
 
-def format(file:Union[str, IO], template:str=_DEFAULT_TEMPLATE_, date_format:str=_DEFAULT_DATE_FORMAT_) -> str:
-    if not file:
-        return ""
+def format(source:Union[str, IO], template:str=_DEFAULT_TEMPLATE_, date_format:str=_DEFAULT_DATE_FORMAT_) -> str:
+    log = parse(source, template, date_format)
+    return "\n\n".join(str(entry) for entry in log)
 
-    if isinstance(file, str):
-        file = StringIO(file)
 
-    log = ET.parse(file).getroot()
+def parse(source, template, date_format):
+    if not source:
+        return ()
 
-    return "\n\n".join(str(LogEntry(entry, template, date_format)) for entry in log)
+    if isinstance(source, str):
+        source = StringIO(source)
+
+    return (LogEntry(entry, template, date_format) for entry in ET.parse(source).getroot())
+
 
 
 class Path:
