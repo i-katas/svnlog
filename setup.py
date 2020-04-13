@@ -6,6 +6,6 @@ setup(
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     extras_require=dict(
-        dev=['flake8']
+        dev=['flake8', 'pytest-cov']
     )
 )
