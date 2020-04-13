@@ -1,7 +1,7 @@
 import svnlog
 import sys
 from typing import Callable, Union, IO, Optional
-from argparse import ArgumentParser
+from argparse import ArgumentParser, _AppendAction
 
 STDIN = str(b'/dev/stdin')
 
@@ -41,10 +41,18 @@ def build_parser(stdin: Union[str, IO]):
     parser.add_argument('file', type=redirect, nargs='?', default=STDIN, help='the svn xml format log file')
     parser.add_argument('-t', '--template', type=open, help='use custom log template file')
     parser.add_argument('-p', '--remote-path', type=str, help='remove the remote path from the path of log entry')
-    parser.add_argument('-i', '--include', nargs='*', action='extend', help='include paths that matches regular pattern expression')
-    parser.add_argument('-x', '--exclude', nargs='*', action='extend', help='exclude paths that matches regular pattern expression')
+    parser.add_argument('-i', '--include', nargs='*', action=extend, help='include paths that matches regular pattern expression')
+    parser.add_argument('-x', '--exclude', nargs='*', action=extend, help='exclude paths that matches regular pattern expression')
 
     return parser
+
+
+class extend(_AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        items = getattr(namespace, self.dest, None)
+        items = items[:] if items else []
+        items.extend(values)
+        setattr(namespace, self.dest, items)
 
 
 def text_of(source: Optional[IO], default: str = None) -> str:
