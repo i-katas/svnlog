@@ -1,4 +1,4 @@
-from typing import Union, Generator, IO, List, cast, Iterator
+from typing import Union, Generator, IO, List, cast, Iterator, Callable, Tuple
 from io import StringIO
 from xml.etree import ElementTree as ET
 from datetime import datetime
@@ -81,9 +81,13 @@ class LogEntry:
         return (Path(path, self._remote_path) for path in self._element.findall('paths/path'))
 
 
-def format(entries: List[LogEntry], template: str = _DEFAULT_TEMPLATE_) -> str:
+PathMatcher = Callable[[Path], bool]
+
+
+def format(entries: List[LogEntry], template: str = _DEFAULT_TEMPLATE_, match_path: PathMatcher = None) -> str:
     def __format__(entry: LogEntry) -> str:
-        props = dict(revision=entry.revision, author=entry.author, date=entry.date, message=entry.message, paths=entry.paths, crlf='\n')
+        paths = entry.paths if match_path is None else (path for path in entry.paths if match_path(path))
+        props = dict(revision=entry.revision, author=entry.author, date=entry.date, message=entry.message, paths=paths, crlf='\n')
         return eval(f'f"""{template}"""', props, props)
 
     return "\n\n".join(__format__(cast(LogEntry, entry)) for entry in entries)
@@ -100,3 +104,11 @@ def parse(source: Union[str, IO], remote_path: str = None) -> Iterator[LogEntry]
         remote_path = remote_path + PATH_SEPERATOR
 
     return (LogEntry(entry, remote_path) for entry in ET.parse(source).getroot())
+
+
+def match(regexp: Union[str, Tuple[str]]) -> PathMatcher:
+    import re
+    if isinstance(regexp, str):
+        regexp = (regexp,)
+    matchers = tuple(re.compile(each).search for each in regexp)
+    return lambda path: any(match(path.path) for match in matchers)

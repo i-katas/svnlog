@@ -105,6 +105,26 @@ def test_format_with_custom_template():
     assert result == "43657: src/main/java/Main.java"
 
 
+def test_print_included_paths_only():
+    xml = """
+        <log>
+        <logentry revision="43657">
+        <author>bob</author>
+        <date>2020-04-09T01:11:44.487000Z</date>
+        <paths>
+        <path action="M" prop-mods="false" text-mods="true" kind="file">src/main/java/Main.java</path>
+        <path action="D" prop-mods="false" text-mods="true" kind="file">src/main/java/package-info.java</path>
+        </paths>
+        <msg>fix typos</msg>
+        </logentry>
+        </log>
+    """
+    log = svnlog.format(svnlog.parse(StringIO(xml)), match_path=svnlog.match('Main.java'))
+
+    assert 'Main.java' in log
+    assert 'package-info.java' not in log
+
+
 def test_log_entry_message_is_optional():
     entry = LogEntry(parse("""
         <logentry revision="43657">
@@ -164,6 +184,15 @@ def test_path_actions_translation():
     assert Path(parse('<path action="A"/>')).action == 'Added'
     assert Path(parse('<path action="R"/>')).action == 'Renamed'
     assert Path(parse('<path action="D"/>')).action == 'Deleted'
+
+
+def test_match_paths():
+    path = next(next(svnlog.parse(StringIO(single_entry_log))).paths)
+
+    assert svnlog.match('Main.java')(path)
+    assert svnlog.match(['Main.java', 'TestMain.java'])(path)
+    assert not svnlog.match('TestMain.java')(path)
+    assert not svnlog.match(['TestMain.java', 'other'])(path)
 
 
 def parse(xml):

@@ -55,8 +55,10 @@ def test_suppress_traceback_if_file_not_exists():
 
 def test_run_as_script():
     with svnlog(path_of('log.xml')) as proc:
-        log = str(proc.communicate()[0], encoding='utf8')
-        assert "Message:\nfix typos" in log
+        log, err = proc.communicate()
+
+        assert not err
+        assert "fix typos" in str(log, encoding='utf8')
 
 
 @pytest.mark.skipif(not sys.stdin.isatty(), reason='stdin is non-tty stream')
@@ -77,24 +79,42 @@ def svnlog(*args):
 
 
 def test_print_paths_relative_to_remote_path():
-    xml = """
-        <log>
-        <logentry revision="43655">
-        <author>kitty</author>
-        <date>2020-04-09T00:11:44.487000Z</date>
-        <paths>
-        <path action="M" prop-mods="false" text-mods="true" kind="file">/remote/trunk/src/main/java/Main.java</path>
-        </paths>
-        <msg>remove package-info</msg>
-        </logentry>
-        </log>
-    """
-
     stdout = StringIO()
 
-    main('--remote-path', '/remote/trunk', stdin=StringIO(xml), write=stdout.write)
+    main('--remote-path', 'src', stdin=path_of('log.xml'), write=stdout.write)
 
-    assert "Modified: src/main/java/Main.java" in stdout.getvalue()
+    assert ": main/java/Main.java" in stdout.getvalue()
+    assert ": test/java/TestMain.java" in stdout.getvalue()
+
+
+def test_print_included_paths_only():
+    stdout = StringIO()
+
+    main('--include', 'src/main', '--include', 'package-info.java', stdin=path_of('log.xml'), write=stdout.write)
+
+    assert "/Main.java" in stdout.getvalue()
+    assert "/package-info.java" in stdout.getvalue()
+    assert "/TestMain.java" not in stdout.getvalue()
+
+
+def test_skip_exclude_paths():
+    stdout = StringIO()
+
+    main('--exclude', 'src/main', '--exclude', 'package-info.java', stdin=path_of('log.xml'), write=stdout.write)
+
+    assert "/Main.java" not in stdout.getvalue()
+    assert "/package-info.java" not in stdout.getvalue()
+    assert "/TestMain.java" in stdout.getvalue()
+
+
+def test_use_composed_filters():
+    stdout = StringIO()
+
+    main('--exclude', 'src/test', '--include', 'package-info.java', stdin=path_of('log.xml'), write=stdout.write)
+
+    assert "/Main.java" in stdout.getvalue()
+    assert "/package-info.java" in stdout.getvalue()
+    assert "/TestMain.java" not in stdout.getvalue()
 
 
 def test_raise_syntax_error_when_format_a_bad_formatted_log():
