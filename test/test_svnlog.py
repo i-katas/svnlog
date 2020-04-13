@@ -105,7 +105,7 @@ def test_format_with_custom_template():
 
 
 def test_print_included_paths_only():
-    log = svnlog.format(svnlog.parse(StringIO(single_entry_log_with_multiple_paths)), match_path=svnlog.match('Main.java'))
+    log = svnlog.format(svnlog.parse(StringIO(single_entry_log_with_multiple_paths)), match=svnlog.match('Main.java'))
 
     assert 'Main.java' in log
     assert 'package-info.java' not in log

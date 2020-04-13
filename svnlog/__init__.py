@@ -1,4 +1,4 @@
-from typing import Union, Generator, IO, List, cast, Iterator, Callable, Tuple
+from typing import Union, Iterable, IO, List, cast, Callable, Tuple, Optional
 from io import StringIO
 from xml.etree import ElementTree as ET
 from datetime import datetime
@@ -44,7 +44,7 @@ class Path:
         return self._element.get('kind')
 
     @property
-    def is_textmod(self) -> str:
+    def is_textmod(self) -> bool:
         return self._element.get('text-mods') == 'true'
 
     @property
@@ -85,26 +85,26 @@ class LogEntry:
         return '' if msg is None else msg.text
 
     @property
-    def paths(self) -> Generator[Path, None, None]:
+    def paths(self) -> Iterable[Path]:
         return (Path(path, self._remote_path) for path in self._element.findall('paths/path'))
 
 
 PathMatcher = Callable[[Path], bool]
 
 
-def format(entries: List[LogEntry], template: str = _DEFAULT_TEMPLATE_, match_path: PathMatcher = None, skip_no_paths: bool = False) -> str:
-    def __format__(entry: LogEntry) -> str:
-        paths = tuple(entry.paths if match_path is None else (path for path in entry.paths if match_path(path)))
+def format(entries: List[LogEntry], template: str = _DEFAULT_TEMPLATE_, match: Optional[PathMatcher] = None, skip_no_paths: bool = False) -> str:
+    def __format__(entry: LogEntry) -> Optional[str]:
+        paths = tuple(entry.paths if match is None else (path for path in entry.paths if match(path)))
         if not paths and skip_no_paths:
             return None
         props = dict(revision=entry.revision, author=entry.author, date=entry.date, message=entry.message, paths=iter(paths), crlf='\n')
         return eval(f'f"""{template}"""', props, props)
 
-    generator = (__format__(cast(LogEntry, entry)) for entry in entries)
-    return "\n\n".join(item for item in generator if item)
+    lines = (__format__(cast(LogEntry, entry)) for entry in entries)
+    return "\n\n".join(line for line in lines if line)
 
 
-def parse(source: Union[str, IO], remote_path: str = None) -> Iterator[LogEntry]:
+def parse(source: Optional[Union[str, IO]], remote_path: Optional[str] = None) -> Iterable[LogEntry]:
     if not source:
         return iter(())
 

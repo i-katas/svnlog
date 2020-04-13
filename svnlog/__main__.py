@@ -4,9 +4,10 @@ from typing import Callable, Union, IO, Optional
 from argparse import ArgumentParser, _AppendAction
 
 STDIN = str(b'/dev/stdin')
+Resource = Union[str, IO]
 
 
-def main(*args, stdin: Union[str, IO] = sys.stdin, write: Callable[[str], None] = print):
+def main(*args, stdin: Resource = sys.stdin, write: Callable[[str], None] = print):
     try:
         args = args or sys.argv[1:]
         parser = build_parser(stdin)
@@ -35,7 +36,7 @@ def path_matcher_of(options):
     return matcher
 
 
-def build_parser(stdin: Union[str, IO]):
+def build_parser(stdin: Resource):
     parser = ArgumentParser(prog=svnlog.__name__)
 
     def redirect(path):
