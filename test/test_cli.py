@@ -122,9 +122,10 @@ def test_filter_path_by_action():
 
     main('--action', 'AM', stdin=path_of('log.xml'), write=stdout.write)
 
-    assert "/Main.java" in stdout.getvalue()
-    assert "/TestMain.java" in stdout.getvalue()
-    assert "/package-info.java" not in stdout.getvalue()
+    assert "Modified: src/main/java/Main.java" in stdout.getvalue()
+    assert "Added: src/main/java\n" in stdout.getvalue()
+    assert "Added: src/test/java/TestMain.java" in stdout.getvalue()
+    assert "Deleted: src/test/java/package-info.java" not in stdout.getvalue()
 
 
 def test_skip_print_log_with_empty_paths():
@@ -142,6 +143,26 @@ def test_filter_path_by_action_and_path_filters():
 
     assert "/Main.java" in stdout.getvalue()
     assert "/TestMain.java" not in stdout.getvalue()
+
+
+def test_filter_path_by_kind():
+    stdout = StringIO()
+
+    main('--kind', 'file', '-a', 'A', stdin=path_of('log.xml'), write=stdout.write)
+
+    assert "Added: src/test/java/TestMain.java" in stdout.getvalue()
+    assert "Modified: src/main/java/Main.java" not in stdout.getvalue()
+    assert "Added: src/main/java" not in stdout.getvalue()
+
+
+def test_filter_path_by_textmods():
+    stdout = StringIO()
+
+    main('--text', '-a', 'A', stdin=path_of('log.xml'), write=stdout.write)
+
+    assert "Added: src/test/java/TestMain.java" in stdout.getvalue()
+    assert "Modified: src/main/java/Main.java" not in stdout.getvalue()
+    assert "Added: src/main/java" not in stdout.getvalue()
 
 
 def test_raise_syntax_error_when_format_a_bad_formatted_log():

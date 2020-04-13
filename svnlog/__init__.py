@@ -40,13 +40,21 @@ class Path:
         self._remote_path = remote_path
 
     @property
-    def path(self) -> str:
-        path = self._element.text
-        return path[len(self._remote_path):] if self._remote_path and path.startswith(self._remote_path) else path
+    def kind(self) -> str:
+        return self._element.get('kind')
+
+    @property
+    def is_textmod(self) -> str:
+        return self._element.get('text-mods') == 'true'
 
     @property
     def action(self) -> str:
         return self._actions.get(self._element.get('action'))
+
+    @property
+    def path(self) -> str:
+        path = self._element.text
+        return path[len(self._remote_path):] if self._remote_path and path.startswith(self._remote_path) else path
 
     def __str__(self) -> str:
         return ': '.join((self.action, self.path))

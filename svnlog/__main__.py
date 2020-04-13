@@ -28,8 +28,10 @@ def path_matcher_of(options):
         matcher = either(matcher, match(options.include))
     if options.exclude:
         matcher = either(matcher, negate(match(options.exclude)))
-    if options.action:
-        matcher = both(matcher, lambda path: path.action[0] in options.action)
+    if options.text:
+        matcher = both(matcher, lambda path: path.is_textmod)
+    matcher = both(matcher, lambda path: path.action[0] in options.action)
+    matcher = both(matcher, lambda path: path.kind in options.kind)
     return matcher
 
 
@@ -48,10 +50,12 @@ def build_parser(stdin: Union[str, IO]):
     parser.add_argument('file', type=redirect, nargs='?', default=STDIN, help='the svn xml format log file')
     parser.add_argument('-t', '--template', type=open, help='use custom log template file')
     parser.add_argument('-p', '--remote-path', type=str, help='remove the remote path from the path of log entry')
-    parser.add_argument('-a', '--action', nargs='?', type=str, help='filter logs paths by actions: [A, M, R, D], e.g: --action ARMD')
+    parser.add_argument('-a', '--action', nargs='?', type=str, default='ARMD', help='filter logs paths by actions: [A, M, R, D], e.g: --action ARMD')
+    parser.add_argument('-k', '--kind', nargs='?', type=str, default='file,dir', help='filter logs paths by kind: file, dir, e.g: --kind file,dir')
     parser.add_argument('-i', '--include', nargs='*', action=extend, help='include paths that matches regular pattern expression')
     parser.add_argument('-x', '--exclude', nargs='*', action=extend, help='exclude paths that matches regular pattern expression')
     parser.add_argument('-s', '--skip-no-paths', action='store_true', help='skip to print the log entry without any paths, default: disabled')
+    parser.add_argument('--text', action='store_true', help='skip to print the non-text path')
 
     return parser
 

@@ -16,5 +16,5 @@ pip install .
 
 ```bash
 svn log --xml -v | svnlog --remote-path /remote/trunk --template custom_template.txt \
---include src --include test --exclude build --action ARM -s >changelist.txt
+--include src --include test --exclude build --action ARM -s --text >changelist.txt
 ```
