@@ -13,8 +13,8 @@ def always_false(_) -> Predicate:
 
 
 def both(left: Predicate, right: Predicate) -> Predicate:
-    left = left or always_false
-    right = right or always_false
+    left = left or always_true
+    right = right or always_true
     return lambda value: left(value) and right(value)
 
 

@@ -135,6 +135,15 @@ def test_skip_print_log_with_empty_paths():
     assert "" == stdout.getvalue()
 
 
+def test_filter_path_by_action_and_path_filters():
+    stdout = StringIO()
+
+    main('-a', 'AM', '--exclude', 'TestMain.java', stdin=path_of('log.xml'), write=stdout.write)
+
+    assert "/Main.java" in stdout.getvalue()
+    assert "/TestMain.java" not in stdout.getvalue()
+
+
 def test_raise_syntax_error_when_format_a_bad_formatted_log():
     bad_log = '<badlog>'
 

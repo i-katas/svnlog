@@ -6,7 +6,8 @@ def test_matches_if_both_matched():
     assert not both(always_true, always_false)(any)
     assert not both(always_false, always_true)(any)
     assert not both(always_false, always_false)(any)
-    assert not both(always_true, None)(any)
+    assert both(always_true, None)(any)
+    assert both(None, None)(any)
 
 
 def test_matches_if_either_matched():

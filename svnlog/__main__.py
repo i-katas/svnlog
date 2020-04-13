@@ -22,14 +22,14 @@ def main(*args, stdin: Union[str, IO] = sys.stdin, write: Callable[[str], None] 
 
 def path_matcher_of(options):
     from svnlog import match
-    from svnlog.predicates import either, negate
+    from svnlog.predicates import both, either, negate
     matcher = None
     if options.include:
         matcher = either(matcher, match(options.include))
     if options.exclude:
         matcher = either(matcher, negate(match(options.exclude)))
     if options.action:
-        matcher = either(matcher, lambda path: path.action[0] in options.action)
+        matcher = both(matcher, lambda path: path.action[0] in options.action)
     return matcher
 
 
