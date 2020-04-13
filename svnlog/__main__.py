@@ -13,7 +13,9 @@ def main(*args, stdin: Union[str, IO] = sys.stdin, write: Callable[[str], None] 
 
         options = parser.parse_args(args)
 
-        write(svnlog.format(svnlog.parse(options.file, options.remote_path), text_of(options.template, svnlog._DEFAULT_TEMPLATE_), path_matcher_of(options)))
+        entries = svnlog.parse(options.file, options.remote_path)
+        template = text_of(options.template, svnlog._DEFAULT_TEMPLATE_)
+        write(svnlog.format(entries, template, path_matcher_of(options), options.skip_no_paths))
     except FileNotFoundError as e:
         raise SystemExit(f'{e.strerror}: {e.filename}')
 
@@ -49,6 +51,7 @@ def build_parser(stdin: Union[str, IO]):
     parser.add_argument('-a', '--action', nargs='?', type=str, help='filter logs paths by actions: [A, M, R, D], e.g: --action ARMD')
     parser.add_argument('-i', '--include', nargs='*', action=extend, help='include paths that matches regular pattern expression')
     parser.add_argument('-x', '--exclude', nargs='*', action=extend, help='exclude paths that matches regular pattern expression')
+    parser.add_argument('-s', '--skip-no-paths', action='store_true', help='skip to print the log entry without any paths, default: disabled')
 
     return parser
 

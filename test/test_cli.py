@@ -127,6 +127,14 @@ def test_filter_path_by_action():
     assert "/package-info.java" not in stdout.getvalue()
 
 
+def test_skip_print_log_with_empty_paths():
+    stdout = StringIO()
+
+    main('--skip-no-paths', '--exclude', '.*', stdin=path_of('log.xml'), write=stdout.write)
+
+    assert "" == stdout.getvalue()
+
+
 def test_raise_syntax_error_when_format_a_bad_formatted_log():
     bad_log = '<badlog>'
 

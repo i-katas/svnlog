@@ -84,13 +84,16 @@ class LogEntry:
 PathMatcher = Callable[[Path], bool]
 
 
-def format(entries: List[LogEntry], template: str = _DEFAULT_TEMPLATE_, match_path: PathMatcher = None) -> str:
+def format(entries: List[LogEntry], template: str = _DEFAULT_TEMPLATE_, match_path: PathMatcher = None, skip_no_paths: bool = False) -> str:
     def __format__(entry: LogEntry) -> str:
-        paths = entry.paths if match_path is None else (path for path in entry.paths if match_path(path))
-        props = dict(revision=entry.revision, author=entry.author, date=entry.date, message=entry.message, paths=paths, crlf='\n')
+        paths = tuple(entry.paths if match_path is None else (path for path in entry.paths if match_path(path)))
+        if not paths and skip_no_paths:
+            return None
+        props = dict(revision=entry.revision, author=entry.author, date=entry.date, message=entry.message, paths=iter(paths), crlf='\n')
         return eval(f'f"""{template}"""', props, props)
 
-    return "\n\n".join(__format__(cast(LogEntry, entry)) for entry in entries)
+    generator = (__format__(cast(LogEntry, entry)) for entry in entries)
+    return "\n\n".join(item for item in generator if item)
 
 
 def parse(source: Union[str, IO], remote_path: str = None) -> Iterator[LogEntry]:
