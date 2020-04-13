@@ -10,7 +10,10 @@ check:
 	@${ACTIVATE_ENV} && flake8
 
 install:
-	@${ACTIVATE_ENV} && python setup.py install
+	@${ACTIVATE_ENV} && pip install .
+
+uninstall:
+	@${ACTIVATE_ENV} && pip uninstall svnlog -y
 
 clean:
 	@rm -rf .pytest_cache .eggs build dist *.egg-info src/*.egg-info

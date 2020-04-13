@@ -1,8 +1,7 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
-    package_dir={'': 'src'},
-    packages=find_packages('src'),
+    packages=['svnlog'],
     python_requires='>=3.6',
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
