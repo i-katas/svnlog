@@ -107,7 +107,7 @@ def test_skip_exclude_paths():
     assert "/TestMain.java" in stdout.getvalue()
 
 
-def test_use_composed_filters():
+def test_use_composed_filters_to_filter_paths():
     stdout = StringIO()
 
     main('--exclude', 'src/test', '--include', 'package-info.java', stdin=path_of('log.xml'), write=stdout.write)
@@ -115,6 +115,16 @@ def test_use_composed_filters():
     assert "/Main.java" in stdout.getvalue()
     assert "/package-info.java" in stdout.getvalue()
     assert "/TestMain.java" not in stdout.getvalue()
+
+
+def test_filter_path_by_action():
+    stdout = StringIO()
+
+    main('--action', 'AM', stdin=path_of('log.xml'), write=stdout.write)
+
+    assert "/Main.java" in stdout.getvalue()
+    assert "/TestMain.java" in stdout.getvalue()
+    assert "/package-info.java" not in stdout.getvalue()
 
 
 def test_raise_syntax_error_when_format_a_bad_formatted_log():

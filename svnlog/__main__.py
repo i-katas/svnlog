@@ -13,17 +13,22 @@ def main(*args, stdin: Union[str, IO] = sys.stdin, write: Callable[[str], None] 
 
         options = parser.parse_args(args)
 
-        from svnlog import match
-        from svnlog.predicates import either, negate
-        matcher = None
-        if options.include:
-            matcher = either(matcher, match(options.include))
-        if options.exclude:
-            matcher = either(matcher, negate(match(options.exclude)))
-
-        write(svnlog.format(svnlog.parse(options.file, options.remote_path), text_of(options.template, svnlog._DEFAULT_TEMPLATE_), match_path=matcher))
+        write(svnlog.format(svnlog.parse(options.file, options.remote_path), text_of(options.template, svnlog._DEFAULT_TEMPLATE_), path_matcher_of(options)))
     except FileNotFoundError as e:
         raise SystemExit(f'{e.strerror}: {e.filename}')
+
+
+def path_matcher_of(options):
+    from svnlog import match
+    from svnlog.predicates import either, negate
+    matcher = None
+    if options.include:
+        matcher = either(matcher, match(options.include))
+    if options.exclude:
+        matcher = either(matcher, negate(match(options.exclude)))
+    if options.action:
+        matcher = either(matcher, lambda path: path.action[0] in options.action)
+    return matcher
 
 
 def build_parser(stdin: Union[str, IO]):
@@ -41,6 +46,7 @@ def build_parser(stdin: Union[str, IO]):
     parser.add_argument('file', type=redirect, nargs='?', default=STDIN, help='the svn xml format log file')
     parser.add_argument('-t', '--template', type=open, help='use custom log template file')
     parser.add_argument('-p', '--remote-path', type=str, help='remove the remote path from the path of log entry')
+    parser.add_argument('-a', '--action', nargs='?', type=str, help='filter logs paths by actions: [A, M, R, D], e.g: --action ARMD')
     parser.add_argument('-i', '--include', nargs='*', action=extend, help='include paths that matches regular pattern expression')
     parser.add_argument('-x', '--exclude', nargs='*', action=extend, help='exclude paths that matches regular pattern expression')
 

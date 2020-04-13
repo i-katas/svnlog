@@ -5,8 +5,8 @@
         <msg>fix typos</msg>
         <paths>
             <path action="M" prop-mods="false" text-mods="true" kind="file">src/main/java/Main.java</path>
-            <path action="M" prop-mods="false" text-mods="true" kind="file">src/test/java/TestMain.java</path>
-            <path action="M" prop-mods="false" text-mods="true" kind="file">src/test/java/package-info.java</path>
+            <path action="A" prop-mods="false" text-mods="true" kind="file">src/test/java/TestMain.java</path>
+            <path action="D" prop-mods="false" text-mods="true" kind="file">src/test/java/package-info.java</path>
         </paths>
     </logentry>
 </log>

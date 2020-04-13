@@ -14,6 +14,19 @@ single_entry_log = """
     </logentry>
     </log>
 """
+single_entry_log_with_multiple_paths = """
+    <log>
+    <logentry revision="43657">
+    <author>bob</author>
+    <date>2020-04-09T01:11:44.487000Z</date>
+    <paths>
+    <path action="M" prop-mods="false" text-mods="true" kind="file">src/main/java/Main.java</path>
+    <path action="D" prop-mods="false" text-mods="true" kind="file">src/main/java/package-info.java</path>
+    </paths>
+    <msg>fix typos</msg>
+    </logentry>
+    </log>
+"""
 
 
 def test_return_empty_generator_when_parse_empty_logs():
@@ -33,21 +46,7 @@ Modified: src/main/java/Main.java
 
 
 def test_format_single_entry_log_with_multiple_paths():
-    xml = """
-        <log>
-        <logentry revision="43657">
-        <author>bob</author>
-        <date>2020-04-09T01:11:44.487000Z</date>
-        <paths>
-        <path action="M" prop-mods="false" text-mods="true" kind="file">src/main/java/Main.java</path>
-        <path action="D" prop-mods="false" text-mods="true" kind="file">src/main/java/package-info.java</path>
-        </paths>
-        <msg>fix typos</msg>
-        </logentry>
-        </log>
-    """
-
-    log = svnlog.format(svnlog.parse(xml))
+    log = svnlog.format(svnlog.parse(single_entry_log_with_multiple_paths))
 
     assert 'Modified: src/main/java/Main.java' in log
     assert 'Deleted: src/main/java/package-info.java' in log
@@ -106,20 +105,7 @@ def test_format_with_custom_template():
 
 
 def test_print_included_paths_only():
-    xml = """
-        <log>
-        <logentry revision="43657">
-        <author>bob</author>
-        <date>2020-04-09T01:11:44.487000Z</date>
-        <paths>
-        <path action="M" prop-mods="false" text-mods="true" kind="file">src/main/java/Main.java</path>
-        <path action="D" prop-mods="false" text-mods="true" kind="file">src/main/java/package-info.java</path>
-        </paths>
-        <msg>fix typos</msg>
-        </logentry>
-        </log>
-    """
-    log = svnlog.format(svnlog.parse(StringIO(xml)), match_path=svnlog.match('Main.java'))
+    log = svnlog.format(svnlog.parse(StringIO(single_entry_log_with_multiple_paths)), match_path=svnlog.match('Main.java'))
 
     assert 'Main.java' in log
     assert 'package-info.java' not in log
