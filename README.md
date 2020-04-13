@@ -1,6 +1,6 @@
 # SVNLog
 
-SVNLog is an extension tools for formating the svn xml log, e.g:
+SVNLog is an extension tools for formating the svn xml log.
 
 
 ## Installation
