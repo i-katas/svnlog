@@ -1,4 +1,5 @@
 import pytest
+import sys
 from svnlog.__main__ import main
 from io import StringIO
 from os import path
@@ -53,15 +54,16 @@ def test_suppress_traceback_if_file_not_exists():
 
 
 def test_run_as_script():
-    log = svnlog(path_of('log.xml')).communicate()[0]
+    with svnlog(path_of('log.xml')) as proc:
+        log = str(proc.communicate()[0], encoding='utf8')
+        assert "Message:\nfix typos" in log
 
-    assert "Message:\nfix typos" in log
 
-
+@pytest.mark.skipif(not sys.stdin.isatty(), reason='stdin is non-tty stream')
 def test_fails_to_run_as_script_from_tty():
     proc = svnlog('--template', path_of('template.txt'))
     try:
-        err = proc.communicate(timeout=0.5)[1]
+        err = str(proc.communicate(timeout=0.5)[1], encoding='utf8')
 
         assert 'usage: svnlog' in err
     finally:
@@ -69,10 +71,9 @@ def test_fails_to_run_as_script_from_tty():
 
 
 def svnlog(*args):
-    import sys
     from subprocess import Popen, PIPE
 
-    return Popen([sys.executable, path_of('../svnlog'), *args], stdout=PIPE, stderr=PIPE, text=True)
+    return Popen([sys.executable, path_of('../svnlog'), *args], stdout=PIPE, stderr=PIPE)
 
 
 def test_print_paths_relative_to_remote_path():
