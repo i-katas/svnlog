@@ -25,12 +25,14 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install virtualenv '.[dev]'
+        PIP_FLAGS='--index-url https://pypi.org/simple'
+        python -m pip install $PIP_FLAGS --upgrade pip
+        pip install $PIP_FLAGS virtualenv 
+        python -m virtualenv .env
+        source .bashrc
+        pip install $PIP_FLAGS pytest pytest-runner '.[dev]'
     - name: Test with pytest
       run: |
-        python -m virtualenv .env
         make test
         pip install -e .
-        source .bashrc
         svnlog test/log.xml
