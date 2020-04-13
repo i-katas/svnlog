@@ -9,12 +9,12 @@ class tty:
         return True
 
 
-def test_show_usage_if_stream_is_a_tty_stream():
-    with pytest.raises(SystemExit, match='usage:'):
+def test_format_from_tty_stream_will_show_usage_and_exit_immediately():
+    with pytest.raises(SystemExit, match='usage: svnlog'):
         main(stdin=tty())
 
 
-def test_format_log_from_non_atty_stream():
+def test_format_log_from_pipe_stream():
     stdout = StringIO()
     xml = StringIO("""
         <log>
@@ -48,7 +48,7 @@ def test_use_custom_template_to_format_log():
 
 
 def test_suppress_traceback_if_file_not_exists():
-    with pytest.raises(SystemExit, match='No such file'):
+    with pytest.raises(SystemExit, match='^No such file or directory: .*?/absent$'):
         main(stdin=path_of('absent'))
 
 
@@ -58,7 +58,7 @@ def test_run_as_script():
     assert "Message:\nfix typos" in log
 
 
-def test_fails_to_run_as_script_with_tty_stdin():
+def test_fails_to_run_as_script_from_tty():
     proc = svnlog('--template', path_of('template.txt'))
     try:
         err = proc.communicate(timeout=0.5)[1]
@@ -75,7 +75,7 @@ def svnlog(*args):
     return Popen([sys.executable, path_of('../svnlog'), *args], stdout=PIPE, stderr=PIPE, text=True)
 
 
-def test_print_paths_relative_to_current_working_dir():
+def test_print_paths_relative_to_remote_path():
     xml = """
         <log>
         <logentry revision="43655">
@@ -96,7 +96,7 @@ def test_print_paths_relative_to_current_working_dir():
     assert "Modified: src/main/java/Main.java" in stdout.getvalue()
 
 
-def test_raise_syntax_error_when_parse_a_bad_log_file():
+def test_raise_syntax_error_when_format_a_bad_formatted_log():
     bad_log = '<badlog>'
 
     with pytest.raises(SyntaxError):

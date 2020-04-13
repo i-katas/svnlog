@@ -16,7 +16,7 @@ single_entry_log = """
 """
 
 
-def test_parse_empty_logs():
+def test_return_empty_generator_when_parse_empty_logs():
     assert not next(svnlog.parse(''), None)
 
 
@@ -47,16 +47,10 @@ def test_format_single_entry_log_with_multiple_paths():
         </log>
     """
 
-    assert svnlog.format(svnlog.parse(xml)) == """\
-Revision: 43657
-Author: bob
-Date: 2020年4月9日 01:11:44
-Message:
-fix typos
---------------------------------
-Modified: src/main/java/Main.java
-Deleted: src/main/java/package-info.java
-"""
+    log = svnlog.format(svnlog.parse(xml))
+
+    assert 'Modified: src/main/java/Main.java' in log
+    assert 'Deleted: src/main/java/package-info.java' in log
 
 
 def test_format_multiple_log_entries():
@@ -102,21 +96,13 @@ Deleted: src/main/java/package-info.java
 
 
 def test_format_from_iostream():
-    assert svnlog.format(svnlog.parse(StringIO(single_entry_log))) == """\
-Revision: 43657
-Author: bob
-Date: 2020年4月9日 01:11:44
-Message:
-fix typos
---------------------------------
-Modified: src/main/java/Main.java
-"""
+    assert 'Modified: src/main/java/Main.java' in svnlog.format(svnlog.parse(StringIO(single_entry_log)))
 
 
 def test_format_with_custom_template():
-    result = svnlog.format(svnlog.parse(StringIO(single_entry_log)), template="{revision}: {','.join(path.path for path in paths)}")
+    result = svnlog.format(svnlog.parse(StringIO(single_entry_log)), template="{revision}: {next(paths).path}")
 
-    assert result == "43657: src/main/java/Main.java", result
+    assert result == "43657: src/main/java/Main.java"
 
 
 def test_log_entry_message_is_optional():
@@ -161,7 +147,7 @@ def test_create_log_entry_with_modified_paths():
     assert [str(path) for path in entry.paths] == ['Modified: src/main/java/test.java']
 
 
-def test_remove_remote_path_if_possible():
+def test_remove_path_prefix_that_starts_with_remote_path():
     entry = next(svnlog.parse(single_entry_log, remote_path='src/main/java/'))
 
     assert [str(path) for path in entry.paths] == ['Modified: Main.java']
@@ -173,7 +159,7 @@ def test_remove_remote_path_not_ends_with_slash():
     assert [str(path) for path in entry.paths] == ['Modified: Main.java']
 
 
-def test_path_actions():
+def test_path_actions_translation():
     assert Path(parse('<path action="M"/>')).action == 'Modified'
     assert Path(parse('<path action="A"/>')).action == 'Added'
     assert Path(parse('<path action="R"/>')).action == 'Renamed'
