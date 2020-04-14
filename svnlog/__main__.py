@@ -70,7 +70,7 @@ class extend(_AppendAction):
 
 
 def text_of(source: Optional[IO], default: str = None) -> str:
-    return ''.join(source.readlines()) if source else default
+    return source.read() if source else default
 
 
 if __name__ == '__main__':
