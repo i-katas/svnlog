@@ -4,11 +4,11 @@ T = TypeVar('T')
 Predicate = Callable[[T], bool]
 
 
-def always_true(_: T) -> Predicate:
+def always_true(_: T) -> bool:
     return True
 
 
-def always_false(_: T) -> Predicate:
+def always_false(_: T) -> bool:
     return False
 
 
