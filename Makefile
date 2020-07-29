@@ -16,5 +16,5 @@ uninstall:
 	@${ACTIVATE_ENV} && pip uninstall svnlog -y
 
 clean:
-	@rm -rf .pytest_cache .eggs build dist *.egg-info src/*.egg-info
-	@find src test -name __pycache__ | xargs rm -rf
+	@rm -rf .pytest_cache .eggs build dist *.egg-info svnlog/*.egg-info .coverage
+	@find svnlog test -name __pycache__ -o -name *.egg-info | xargs rm -rf
